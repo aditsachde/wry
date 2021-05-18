@@ -192,8 +192,11 @@ impl InnerWebView {
       }
 
       // Resize
-      let zero = CGRect::new(&CGPoint::new(0., 0.), &CGSize::new(0., 0.));
-      let _: () = msg_send![webview, initWithFrame:zero configuration:config];
+      let size = window.inner_size().to_logical(window.scale_factor());
+      let rect = CGRect::new(&CGPoint::new(0., 0.), &CGSize::new(size.width, size.height));
+      let _: () = msg_send![webview, initWithFrame:rect configuration:config];
+      //let zero = CGRect::new(&CGPoint::new(0., 0.), &CGSize::new(0., 0.));
+      //let _: () = msg_send![webview, initWithFrame:zero configuration:config];
       webview.setAutoresizingMask_(NSViewHeightSizable | NSViewWidthSizable);
 
       // Message handler
@@ -295,7 +298,11 @@ impl InnerWebView {
       // Tell the webview we use layers
       let _: () = msg_send![webview, setWantsLayer: YES];
       // Inject the web view into the window as main content
-      let _: () = msg_send![ns_window, setContentView: webview];
+      //let view = window.ns_view() as id;
+      //view.addSubview_(webview);
+      let viewc: id = msg_send![class!(NSViewController), new];
+      let _: () = msg_send![viewc, setView:webview]; 
+      let _: () = msg_send![ns_window, setContentViewController:viewc];
       // make sure the window is always on top when we create a new webview
       let app_class = class!(NSApplication);
       let app: id = msg_send![app_class, sharedApplication];
